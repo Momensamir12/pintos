@@ -124,6 +124,18 @@ sema_up (struct semaphore *sema)
   intr_set_level (old_level);
 }
 
+struct thread *sema_get_highest_priority_waiting (struct semaphore *sema)
+{
+  ASSERT(&sema->waiters != NULL);
+
+  struct list_elem *e;
+  e = list_max(&sema->waiters, compare_priority, NULL);
+  if(e != list_end(&sema->waiters))
+    return e = list_entry(e, struct thread, elem);
+  else
+    return NULL;
+}
+
 static void sema_test_helper (void *sema_);
 
 /* Self-test for semaphores that makes control "ping-pong"
@@ -161,6 +173,7 @@ sema_test_helper (void *sema_)
     }
 }
 
+
 /* Initializes LOCK.  A lock can be held by at most a single
    thread at any given time.  Our locks are not "recursive", that
    is, it is an error for the thread currently holding a lock to
@@ -193,17 +206,27 @@ lock_init (struct lock *lock)
    interrupt handler.  This function may be called with
    interrupts disabled, but interrupts will be turned back on if
    we need to sleep. */
+   
 void
 lock_acquire (struct lock *lock)
 {
+  enum intr_level old_level;
+    
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
-  sema_down (&lock->semaphore);
+  old_level = intr_disable ();
+  if (!sema_try_down (&lock->semaphore))
+    {
+      thread_current()->waiting_for_lock = lock;
+      donate_priority(thread_current());
+      sema_down (&lock->semaphore);
+    }
   lock->holder = thread_current ();
+  thread_lock_acquired (lock);
+  intr_set_level (old_level);
 }
-
 /* Tries to acquires LOCK and returns true if successful or false
    on failure.  The lock must not already be held by the current
    thread.
@@ -232,13 +255,34 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock) 
 {
+  enum intr_level old_level;
+    
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+  old_level = intr_disable ();
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  thread_lock_released (lock);
+  intr_set_level (old_level);
 }
 
+
+struct thread *lock_get_highest_priority_thread (struct lock *lock)
+{
+  ASSERT(intr_get_level() == INTR_OFF);
+  ASSERT(lock != NULL);
+
+  return sema_get_highest_priority_waiting(&lock->semaphore);
+}
+
+struct thread *lock_get_holder(struct lock *lock)
+{
+  ASSERT(intr_get_level() == INTR_OFF);
+  ASSERT(lock != NULL);
+  
+  return lock->holder;
+}
 /* Returns true if the current thread holds LOCK, false
    otherwise.  (Note that testing whether some other thread holds
    a lock would be racy.) */
@@ -249,6 +293,7 @@ lock_held_by_current_thread (const struct lock *lock)
 
   return lock->holder == thread_current ();
 }
+
 
 /* One semaphore in a list. */
 struct semaphore_elem 
@@ -346,7 +391,7 @@ cond_broadcast (struct condition *cond, struct lock *lock)
     cond_signal (cond, lock);
 }
 static bool compare_semaElem(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) {
-    struct semaphore_elem *s1 = list_entry(a, struct thread, elem);
-    struct semaphore_elem *s2 = list_entry(b, struct thread, elem);
+    struct semaphore_elem *s1 = list_entry(a, struct semaphore_elem, elem);
+    struct semaphore_elem *s2 = list_entry(b, struct semaphore_elem, elem);
     return s1->thread->priority > s2->thread->priority;
 }
