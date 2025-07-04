@@ -148,7 +148,6 @@ void thread_set_nice (int);
 void thread_wakeup(int64_t time);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
-bool compare_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
 void thread_yield_to_higher_priority(void);
 void thread_lock_acquired (struct lock *lock);
 void thread_lock_released (struct lock *lock);
