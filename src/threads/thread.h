@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "devices/timer.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -23,7 +24,8 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
-
+#define NICE_MAX 20
+#define NICE_MIN -20
 
 /* A kernel thread or user process.
 
@@ -91,11 +93,15 @@ struct thread
     int priority;                       /* Priority. */
     int original_priority;
     struct list_elem allelem;           /* List element for all threads list. */
+    struct list_elem sleep_elem;          /* List element for sleep list*/
     struct list locks;
     struct lock *waiting_for_lock;
+    struct list_elem sem_elem;
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
     int wakeup_ticks;
+    int nice;
+    uint32_t recent_cpu;
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -143,12 +149,11 @@ void thread_wakeup(int64_t time);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 bool compare_priority(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
-void donate_priority(struct thread *t);
-void refresh_priority(struct thread *t);
 void thread_yield_to_higher_priority(void);
 void thread_lock_acquired (struct lock *lock);
 void thread_lock_released (struct lock *lock);
 struct thread *lock_get_holder(struct lock *lock);
-void thread_lock_will_wait (struct lock *lock);
+void thread_waits_on_lock (struct lock *lock);
+struct thread *lock_get_highest_priority_waiting_thread (struct lock *);
 
 #endif /* threads/thread.h */
