@@ -11,7 +11,7 @@ This repository contains my implementation of Project 1 (**Threads**) and Projec
 - **Priority Scheduling**  
   Implemented a priority-based thread scheduler to replace the default round-robin scheduling.
 
-- ⬆ **Priority Donation**  
+- **Priority Donation**  
   Solved the *priority inversion* problem by implementing nested priority donation when threads acquire locks.
 
 - **Advanced Scheduler**  
