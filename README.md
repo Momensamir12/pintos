@@ -1,30 +1,47 @@
-## Manual Installation Steps:
-1. ### Install QEMU Simulator
-      ```sudo apt-get install qemu```
-1. ### Edit GDBMACROS
-      Open pintos/src/utils/pintos-gdb. Make the variable GDBMACROS point to pintos/src/misc/gdb-macros
-      i.e. ```GDBMACROS=/home/....../pintos/src/misc/gdb-macros```.
-      Note that it should point to the full path.
-1. ### Compile Utils directory
-      ```
-      cd pintos/src/utils
-      make
-      ```
-1. ### Compile Threads directory
-     ```
-     cd pintos/src/threads
-     make
-     ```
-1. ### Edit pintos
-      Open pintos/src/utils/pintos and make the following changes:
-      - Line 259: Replace `kernel.bin` with `/home/.../pintos/src/threads/build/kernel.bin`. Note that we're making it point to full path of kernel.bin
-1. ### Edit Pintos.pm
-      Open pintos/src/utils/Pintos.pm and make the following change:
-      - Line 362: Replace `loader.bin` with `/home/.../pintos/src/threads/build/loader.bin`
-1. ### Export utils directory path to PATH variable
-      Open ~/.bashrc and add this to the last line:
-      ```export PATH=/home/.../pintos/src/utils:$PATH```
-1. ### Reload terminal with the new environment variables
-      ```source ~/.bashrc```
-1. ### Run pintos
-      ```pintos run alarm-multiple```
+# Pintos OS Project
+
+This repository contains my implementation of Project 1 (**Threads**) and Project 2 (**User Programs**) from the [Pintos Operating System](https://web.stanford.edu/class/cs140/projects/pintos/pintos_1.html), a teaching operating system used in many university-level OS courses.
+
+###  Project 1: Threads
+
+**Focus:** Kernel-level thread management and scheduling
+
+**Key Implementations:**
+
+- **Priority Scheduling**  
+  Implemented a priority-based thread scheduler to replace the default round-robin scheduling.
+
+- ⬆ **Priority Donation**  
+  Solved the *priority inversion* problem by implementing nested priority donation when threads acquire locks.
+
+- **Advanced Scheduler**  
+  Added support for the multi-level feedback queue scheduler (MLFQS), using fixed-point arithmetic to calculate recent CPU usage and load average.
+
+- **Synchronization Primitives**  
+  Enhanced semaphores, locks, and condition variables with priority-aware mechanisms.
+
+---
+
+### Project 2: User Programs
+
+**Focus:** User process execution and syscall interface
+
+**Key Implementations:**
+
+- **System Calls**  
+  Implemented system calls such as:
+  - `exit`, `exec`, `wait`
+  - File operations: `open`, `read`, `write`, `close`
+  - File descriptors per process
+
+- **Process Isolation & Validation**  
+  Ensured safe access to user memory using pointer validation and address checks.
+
+- **Process Management**  
+  Designed mechanisms for process creation, loading ELF executables, argument passing via stack setup, and process waiting with proper synchronization.
+
+- **File System Access Control**  
+  Prevented concurrent access issues to the file system using locks.
+
+
+
