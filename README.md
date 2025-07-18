@@ -43,13 +43,16 @@ This repository contains my implementation of Project 1 (**Threads**) and Projec
 - **File System Access Control**  
   Prevented concurrent access issues to the file system using locks.
   
----
-## Repository Structure
+##  Repository Structure
 
+```
 pintos/
 ├── src/
-│ ├── threads/ # Project 1: Thread management
-│ ├── userprog/ # Project 2: User program support
-
-
+│   ├── threads/         # Project 1: Thread management (scheduler, sync, etc.)
+│   │   ├── thread.c
+│   │   ├── synch.c
+│   │   ├── ...
+│   ├── userprog/        # Project 2: User program support (syscalls, process mgmt)
+│   │   ├── process.c
+│   │   ├── syscall.c
 
