@@ -48,11 +48,11 @@ This repository contains my implementation of Project 1 (**Threads**) and Projec
 ```
 pintos/
 ├── src/
-│   ├── threads/         # Project 1: Thread management (scheduler, sync, etc.)
+│   ├── threads/         # Project 1: Thread management 
 │   │   ├── thread.c
 │   │   ├── synch.c
 │   │   ├── ...
-│   ├── userprog/        # Project 2: User program support (syscalls, process mgmt)
+│   ├── userprog/        # Project 2: User program support
 │   │   ├── process.c
 │   │   ├── syscall.c
 
